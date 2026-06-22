@@ -29,4 +29,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function issues(){
+        return $this->belongsToMany(Issue::class);
+    }
+    public function project(){
+        return $this->hasMany(Project::class);
+    }
 }
