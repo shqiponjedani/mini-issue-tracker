@@ -22,7 +22,7 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
         $data['user_id'] = auth()->id() ?? 1;
-        Project::create($request->validated());
+        Project::create($data);
         return redirect()->route('projects.index')->with('success', 'Project created successfully.');
     }
 
