@@ -77,7 +77,7 @@ function fetchComments() {
                 .then(response => {
                     if (loadingText) loadingText.remove();
                     
-                    // PAGINATE kthen objektin ku komentet janë tek: response.data.data
+                  
                     const comments = response.data.data; 
 
                     if (comments.length > 0) {
