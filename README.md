@@ -1,4 +1,5 @@
 MINI ISSUE TRACKER
+
 A simple project management system designed to track tasks, statuses, and priorities.
 Built with Laravel, this application features real-time AJAX interactions for a seamless user experience.
 
