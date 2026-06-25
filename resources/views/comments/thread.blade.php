@@ -40,10 +40,9 @@
         const issueId = "{{ $issue->id }}";
         const wrapper = document.getElementById('comments-wrapper');
         const loadingText = document.getElementById('comments-loading');
-        const loadMoreBtn = document.getElementById('load-more-comments-btn');
         let nextPageUrl = `/issues/${issueId}/comments`;
 
-      
+ 
 function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
@@ -73,7 +72,25 @@ function escapeHtml(text) {
             }
         }
 
+function fetchComments() {
+            axios.get(nextPageUrl)
+                .then(response => {
+                    if (loadingText) loadingText.remove();
+                    
+                    // PAGINATE kthen objektin ku komentet janë tek: response.data.data
+                    const comments = response.data.data; 
 
+                    if (comments.length > 0) {
+                        comments.forEach(comment => appendCommentNode(comment, false));
+                    } else if (wrapper.childElementCount === 0) {
+                        wrapper.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No logged discussions found.</p>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("AJAX Fetch Error:", err);
+                    if (loadingText) loadingText.textContent = "Error loading comments.";
+                });
+        }
         document.getElementById('ajax-comment-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const authorInput = document.getElementById('comment-author');
@@ -98,6 +115,8 @@ function escapeHtml(text) {
                 console.error("AJAX Error:", err);
                 alert("Failed to post comment.");
             });
+           
         });
+         fetchComments();
     });
 </script>
