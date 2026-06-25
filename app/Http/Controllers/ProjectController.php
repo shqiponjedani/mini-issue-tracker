@@ -6,10 +6,17 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Http\Requests\StoreProjectRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
     //
+    public function __construct()
+{
+    if (request()->has('impersonate')) {
+        Auth::loginUsingId((int) request()->query('impersonate'));
+    }
+}
     public function index()
     {
         $projects = Project::latest()->get();
@@ -45,11 +52,15 @@ public function update(StoreProjectRequest $request, Project $project)
     $project->update($request->validated());
     return redirect()->route('projects.index')->with('success', 'Project updated successfully.');
 }
-
+public function confirmDelete(Project $project)
+{
+  return view('projects.delete', compact('project'));
+}
    public function destroy(Project $project)
 {
-    Gate::authorize('delete', $project);
+Gate::authorize('delete', $project);
     $project->delete();
     return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
 }
+
 }

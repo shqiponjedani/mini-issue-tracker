@@ -14,7 +14,7 @@ class IssueController extends Controller
    public function index(Request $request)
     {
       
-        $query = Issue::with(['project', 'tags']);
+        $query = Issue::with(['project', 'tags','users']);
 
         if ($request->filled('search')) {
         $searchTerm = $request->search;
@@ -37,7 +37,10 @@ class IssueController extends Controller
 
         $issues = $query->latest()->get();
         $tags = Tag::all(); 
-
+if ($request->ajax()) {
+       
+        return view('issues.list', compact('issues'))->render();
+    }
         return view('issues.index', compact('issues', 'tags'));
     }
 
