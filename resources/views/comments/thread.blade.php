@@ -43,34 +43,19 @@
         const loadMoreBtn = document.getElementById('load-more-comments-btn');
         let nextPageUrl = `/issues/${issueId}/comments`;
 
-        function fetchComments() {
-            if (!nextPageUrl) return;
-
-            axios.get(nextPageUrl)
-                .then(response => {
-                    if (loadingText) loadingText.remove();
-                    const dataPayload = response.data;
-                    const commentsList = dataPayload.data || dataPayload;
-
-                    if (commentsList.length === 0 && !dataPayload.next_page_url) {
-                        wrapper.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No logged discussions found.</p>`;
-                        return;
-                    }
-
-                    commentsList.forEach(comment => appendCommentNode(comment, false));
-
-                    if (dataPayload.next_page_url) {
-                        nextPageUrl = dataPayload.next_page_url;
-                        loadMoreBtn.classList.remove('hidden');
-                    } else {
-                        nextPageUrl = null;
-                        loadMoreBtn.classList.add('hidden');
-                    }
-                })
-                .catch(err => console.error("Error loading comments stream:", err));
+      
+function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-
+     
         function appendCommentNode(comment, prepend = false) {
+            const placeholder = wrapper.querySelector('p');
+            if (placeholder && placeholder.textContent.includes("No logged discussions")) {
+                placeholder.remove();
+            }
+
             const timestamp = new Date(comment.created_at).toLocaleString();
             const elementStr = `
                 <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 transition hover:bg-gray-100/50">
@@ -81,44 +66,38 @@
                     <p class="text-xs text-gray-600 leading-relaxed">${escapeHtml(comment.body)}</p>
                 </div>
             `;
-            if (prepend) { wrapper.insertAdjacentHTML('afterbegin', elementStr); }
-            else { wrapper.insertAdjacentHTML('beforeend', elementStr); }
+            if (prepend) {
+                wrapper.insertAdjacentHTML('afterbegin', elementStr);
+            } else {
+                wrapper.insertAdjacentHTML('beforeend', elementStr);
+            }
         }
+
 
         document.getElementById('ajax-comment-form').addEventListener('submit', function (e) {
             e.preventDefault();
             const authorInput = document.getElementById('comment-author');
             const bodyInput = document.getElementById('comment-body');
-const noCommentsPlaceholder = wrapper.querySelector('p');
 
-if (!authorInput.value.trim() || !bodyInput.value.trim()) return;
+            if (!authorInput.value.trim() || !bodyInput.value.trim()) return;
+
+           
             axios.post(`/issues/${issueId}/comments`, {
                 author_name: authorInput.value,
                 body: bodyInput.value
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
             })
-            .then(response => {
-             
-        if (noCommentsPlaceholder && noCommentsPlaceholder.textContent.includes("No logged discussions")) {
-            wrapper.innerHTML = '';
-        }
-
-       
-        const newComment = response.data.comment || response.data;
-
-        appendCommentNode(newComment, true);
-                appendCommentNode(response.data, true);
+            .then(function(response) {
+                appendCommentNode(response.data.comment, true);
                 bodyInput.value = '';
             })
-            .catch(err =>{console.error("AJAX Comment Error Matrix:", err);
-        
-        
-        if (err.response && err.response.data && err.response.data.errors) {
-            const validationErrors = Object.values(err.response.data.errors).flat().join('\n');
-            alert("Validation Mismatch:\n" + validationErrors);
-        } else {
-            alert("Failed to commit comment: Secure server channel error.");
-        }
-        
-    });}
-});
+            .catch(function(err) {
+                console.error("AJAX Error:", err);
+                alert("Failed to post comment.");
+            });
+        });
+    });
 </script>
