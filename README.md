@@ -50,6 +50,7 @@ git clone <https://github.com/shqiponjedani/mini-issue-tracker.git>
 cd mini-issue-tracker
 
 
+
 2.Install dependencies:
 
 composer install
@@ -58,15 +59,18 @@ npm install
 
 npm run dev
 
+
 3.Configure your environment:
 
 cp .env.example .env
 
 php artisan key:generate
 
+
 4.Run migrations and seeders:
 
 php artisan migrate --seed
+
 
 5. Start the application:
    
